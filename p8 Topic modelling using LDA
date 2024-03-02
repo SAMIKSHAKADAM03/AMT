@@ -1,0 +1,30 @@
+AMT PRACTICAL NO: 8
+AIM: TOPIC MODELLING PROCESS 
+
+CODE:
+install.packages('tm', dependencies = TRUE)
+install.packages("topicmodels")
+library(tm)
+library(topicmodels)
+setwd(C:\Users\student\Desktop\BFC)
+filenames<-list.files(path="C:/Users/student/Desktop/BFC",pattern="*.txt")
+filenames
+
+
+filetext<-lapply(filenames,readLines)
+mycorpus<-Corpus(VectorSource(filetext))
+mycorpus<-tm_map(mycorpus,removeNumbers)
+mycorpus<-tm_map(mycorpus,removePunctuation)
+mycorpus
+
+mystopwords=c("of","a","and","the","in","to","for","that","is","on","are","with","as","by"
+,"be","an","which","it","from","or","can","have","these","has","such","you")
+mycorpus<-tm_map(mycorpus,tolower)
+mycorpus<-tm_map(mycorpus,removeWords,mystopwords)
+dtm<-DocumentTermMatrix(mycorpus)
+k<-3
+lda_output_3<-LDA(dtm,k,method="VEM")
+topics(lda_output_3)
+
+topics(lda_output_3)
+show(dtm)
