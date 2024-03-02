@@ -1,0 +1,570 @@
+PRACTICAL NO:- 01
+Aim:    A) Data Preprocessing.
+	   B) Classification (Decision Tree)
+Program Code:-
+head(airquality)
+mean(airquality)
+mean(airquality$Solar.R, na.rm = TRUE)
+New_df = airquality
+New_df$Ozone = ifelse(is.na(New_df$Ozone),
+                      median(New_df$Ozone,
+                             na.rm = TRUE),
+                      New_df$Ozone)
+head(New_df)
+##create excel file with two columns roll,marks keep few marks blank.save it as csv file
+dt=read.csv("C:/Users/DELL/Desktop/titanic.csv")
+head(dt)
+dt$marks = ifelse(is.na(dt$marks),
+                  mean(dt$marks,
+                       na.rm = TRUE),
+                  dt$marks)
+#Removing outliers using boxplot
+data <- iris[,2]
+length(data)
+boxplot(data)
+boxplot(data, plot = FALSE)$out
+outliers <- boxplot(data, plot = FALSE)$out
+data_no_outlier <- data[-which(data %in% outliers)]
+boxplot(data_no_outlier, plot = FALSE)$out
+length(data_no_outlier)
+boxplot(data_no_outlier)
+2)	Correlation:
+Program Code:-
+# Load the mtcars dataset
+data(mtcars)
+# Calculate the Pearson's correlation coefficient between mpg and hp
+correlation = cor(mtcars$mpg, mtcars$hp, method = "pearson")
+# Print the correlation coefficient
+print(correlation)
+3)	Chi Square:-
+library(MASS)
+print(str(survey))
+stu_data = data.frame(survey$Smoke,survey$Exer)           
+stu_data = table(survey$Smoke,survey$Exer)                
+print(stu_data)
+print(chisq.test(stu_data))
+4)	Graph Plots:- 
+> # Get the input values.
+> input <- mtcars[, c('wt', 'mpg')]
+> # Plot the chart for cars with
+> # weight between 1.5 to 4 and
+> # mileage between 10 and 25.
+> plot(x = input$wt, y = input$mpg,
++      xlab = "Weight",
++      ylab = "Milage",
++      xlim = c(1.5, 4),
++      ylim = c(10, 25),       
++      main = "Weight vs Milage"
++ )
+ii) Bar chart:-
+> # Create the data for the chart
+> A <- c(20, 40, 25, 50, 10)
+> # Plot the bar chart 
+> barplot(A, horiz = TRUE, xlab = "X-axis",
++         ylab = "Y-axis", main ="Bar-Chart")
+B)Classification:- 
+install.packages("partykit")
+install.packages('caret')
+install.packages("pROC")
+install.packages('rattle')
+install.packages('rpart.plot')
+install.packages('RColorBrewer')
+titanic<-read.csv(file.choose(),header = T,sep=",")
+summary(titanic)
+names(titanic)
+library(partykit)
+titanic$Survived<-as.factor(titanic$Survived)#convert to categorical
+summary(titanic$Pclass)
+names(titanic)
+set.seed(1234)
+pd<-sample(2,nrow(titanic),replace = TRUE, prob=c(0.8,0.2))
+#two samples with distribution 0.8 and 0.2
+trainingset<-titanic[pd==1,]#first partition
+head(trainingset)
+validationset<-titanic[pd==2,]#second partition
+class(titanic$PassengerId)
+class(titanic$Survived)
+class(titanic$Sex)
+class(titanic$Pclass)
+class(titanic$Name)
+class(titanic$Age)
+class(titanic$SibSp)
+class(titanic$Parch)
+class(titanic$Ticket)
+class(titanic$Fare)
+class(titanic$Cabin)
+class(titanic$Embarked)
+tree<-ctree(formula = Survived ~ Pclass + Age + SibSp + Parch + Fare ,data=trainingset)
+class(titanic$Survived)
+plot(tree)
+#Prunning
+tree<-ctree(formula = Survived ~ Pclass + Age + SibSp + Parch +
+              Fare ,data=trainingset,control=ctree_control(mincriterion =
+                                                             0.99,minsplit = 500))
+plot(tree)
+pred<-predict(tree,validationset,type="prob")
+pred
+pred<-predict(tree,validationset)
+pred
+library(caret)
+confusionMatrix(pred,validationset$Survived)
+pred<-predict(tree,validationset,type="prob")
+pred
+library(pROC)
+plot(roc(validationset$Survived,pred[ ,2]))
+library(rpart)
+fit <- rpart(Survived ~ Pclass+ Age + SibSp + Parch +
+               Fare,data=titanic,method="class")
+plot(fit)
+text(fit)
+
+library(rattle)
+library(rpart.plot)
+library(RColorBrewer)
+fancyRpartPlot(fit)
+Prediction <- predict(fit, titanic, type = "class")
+Prediction
+
+PRACTICAL NO:- 02
+Aim: Clustering Techniques
+Code:
+# Load the iris dataset
+data("iris")
+names(iris)
+new_data<-subset(iris, select = c(-Species))
+new_data
+cl<-kmeans(new_data, 3)
+cl
+data<-new_data
+wss<-sapply(1:15, function(k){kmeans(data, k)$tot.withinss})
+wss
+plot(1:15, wss, type='b', pch=19, frame = FALSE, xlab = "Number of clusters K", ylab ="Total within-sum of squares")
+install.packages("cluster")
+library(cluster)
+clusplot(new_data, cl$cluster, color = TRUE, shade = TRUE, labels = 2, lines = 0)
+cl$cluster
+cl$centers
+clusters<-hclust(dist(iris[, 3:4]))
+plot(clusters)
+clusterCut<-cutree(clusters, 3)
+table(clusterCut, iris$Species)
+install.packages("ggplot2")
+library(ggplot2)
+ggplot (iris, aes (Petal.Length, Petal.Width, color = Species)) + 
+  geom_point (alpha = 0.4, size = 3.5) + geom_point (col = clusterCut) + 
+  scale_color_manual (values = c("black", "red", "green"))
+
+Performing K-means clustering on the iris dataset & visualization of the results:-
+Code:-
+install.packages("cluster")
+install.packages("factoextra")
+# Load the required libraries
+library(cluster)
+library(factoextra)
+library(datasets)
+# Load the Iris dataset
+data("iris")
+iris_data <- iris[, 1:4]  # Selecting only the numeric columns
+# Determine the optimal number of clusters using the elbow method
+set.seed(123)
+wss <- numeric(10)
+for (i in 1:10) {
+  kmeans_model <- kmeans(iris_data, centers = i, nstart = 10)
+  wss[i] <- kmeans_model$tot.withinss
+}
+# Plot the elbow method graph
+plot(1:10, wss, type = "b", xlab = "Number of Clusters",
+     ylab = "Within-cluster Sum of Squares")
+# Determine the optimal number of clusters using silhouette coefficient
+silhouette <- numeric(10)
+for (i in 2:10) {
+  kmeans_model <- kmeans(iris_data, centers = i, nstart = 10)
+  silhouette[i] <- silhouette_avg(kmeans_model$cluster, dist(iris_data))
+}
+# Plot the silhouette coefficient graph
+plot(2:10, silhouette[2:10], type = "b", xlab = "Number of Clusters",
+     ylab = "Average Silhouette Width")
+# Perform K-means clustering with the selected number of clusters
+optimal_clusters <- 3  # You can choose the optimal number from the plots
+kmeans_model <- kmeans(iris_data, centers = optimal_clusters, nstart = 10)
+# Visualize the clustering results using the first two features (Sepal.Length and Sepal.Width)
+fviz_cluster(kmeans_model, data = iris_data, geom = "point",
+             stand = FALSE, frame.type = "norm")
+
+Practical No:- 03 
+Aim:- Recommendation System
+Software Used: Google Collab
+Code:
+import pandas as pd
+metadata = pd.read_csv('movies_metadata.csv', low_memory=False)
+metadata.head(3)
+C = metadata['vote_average'].mean()
+print(C)
+m = metadata['vote_count'].quantile(0.90)
+print(m)
+q_movies = metadata.copy().loc[metadata['vote_count'] >= m]
+q_movies.shape
+metadata.shape
+def weighted_rating(x, m=m, C=C):
+    v = x['vote_count']
+    R = x['vote_average']
+    return (v/(v+m) * R) + (m/(m+v) * C)
+q_movies['score'] = q_movies.apply(weighted_rating, axis=1)
+
+q_movies = q_movies.sort_values('score', ascending=False)
+
+q_movies[['title', 'vote_count', 'vote_average', 'score']].head(20)
+
+#Print plot overviews of the first 5 movies.
+q_movies['overview'].head()
+
+#Import TfIdfVectorizer from scikit-learn
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+#Define a TF-IDF Vectorizer Object. Remove all english stop words such as 'the', 'a'
+tfidf = TfidfVectorizer(stop_words='english')
+
+#Replace NaN with an empty string
+q_movies['overview'] = q_movies['overview'].fillna('')
+
+#Construct the required TF-IDF matrix by fitting and transforming the data
+tfidf_matrix = tfidf.fit_transform(q_movies['overview'])
+
+#Output the shape of tfidf_matrix
+tfidf_matrix.shape
+
+#Array mapping from feature integer indices to feature name.
+tfidf.get_feature_names_out()[5000:5010]
+
+# Import linear_kernel
+from sklearn.metrics.pairwise import linear_kernel
+
+# Compute the cosine similarity matrix
+cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
+
+#Construct a reverse map of indices and movie titles
+indices = pd.Series(metadata.index, index=metadata['title']).drop_duplicates()
+
+# Function that takes in movie title as input and outputs most similar movies
+def get_recommendations(title, cosine_sim=cosine_sim):
+    # Get the index of the movie that matches the title
+    idx = indices[title]
+
+    # Get the pairwsie similarity scores of all movies with that movie
+    sim_scores = list(enumerate(cosine_sim[idx]))
+
+    # Sort the movies based on the similarity scores
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+
+    # Get the scores of the 10 most similar movies
+    sim_scores = sim_scores[1:11]
+
+    # Get the movie indices
+    movie_indices = [i[0] for i in sim_scores]
+
+    # Return the top 10 most similar movies
+    return metadata['title'].iloc[movie_indices]
+    get_recommendations('Toy Story')
+
+Practical No:- 04
+Aim:- Collaborative Nearest Neigbour
+Software Used: Google Collab
+Program Code:
+import numpy as np
+import pandas as pd
+from sklearn.neighbors import NearestNeighbors
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Disable FutureWarnings
+import warnings
+warnings.filterwarnings('ignore', category=FutureWarning)
+
+# Load the movie ratings data and the movie data from CSV files
+ratings = pd.read_csv('ratings.csv')
+movies = pd.read_csv('movies.csv')
+
+# Create a mapping from movie IDs to strings
+movie_mapper = {}
+movie_inv_mapper = {}
+for i in range(len(movies)):
+  movie_mapper[movies.loc[i, 'title']] = movies.loc[i, 'movieId']
+  movie_inv_mapper[movies.loc[i, 'movieId']] = movies.loc[i, 'title']
+
+# Create a matrix of movie vectors
+X = np.zeros((len(movies), 100))
+for i in range(len(movies)):
+  movie_id = movies.loc[i, 'movieId']
+  movie_ratings = ratings[ratings['movieId'] == movie_id]['rating']
+  X[i] = movie_ratings.mean()
+
+# Define a function to convert a movie ID to a string
+def movie_id_to_string(movie_id):
+  return movies.loc[movies['movieId'] == movie_id, 'title'].to_string()
+
+# Define a function to find similar movies using KNN
+def find_similar_movies(movie_id, X, k, metric='cosine', show_distance=False):
+  """Finds the k most similar movies to the given movie using KNN.
+
+  Args:
+    movie_id: The ID of the movie to find similar movies for.
+    X: The matrix of movie vectors.
+    k: The number of similar movies to find.
+    metric: The metric to use to measure similarity.
+    show_distance: Whether to show the distance between each movie and the given
+      movie.
+
+  Returns:
+    A list of the k most similar movie IDs.
+  """
+
+  neighbour_ids = []
+  movie_ind = movie_mapper[movie_id]
+  movie_vec = X[movie_ind]
+
+  KNN = NearestNeighbors(n_neighbors=k, algorithm="brute", metric=metric)
+  KNN.fit(X)
+
+  neighbour = KNN.kneighbors(movie_vec, return_distance=show_distance)
+
+  for i in range(0, k):
+    n = neighbour.item(i)
+    neighbour_ids.append(movie_inv_mapper[n])
+
+  return neighbour_ids
+
+# Example usage:
+
+# Get the movie ID for "The Shawshank Redemption"
+movie_id = movie_mapper["The Shawshank Redemption"]
+
+# Find the 5 most similar movies to "The Shawshank Redemption"
+similar_ids = find_similar_movies(movie_id, X, k=5)
+
+# Print the titles of the similar movies
+for i in similar_ids:
+  print(movie_titles[i])
+
+Practical No:- 05
+Aim:- Association
+Code:
+# Load required packages
+install.packages('arules')
+install.packages('arulesViz')
+install.packages('RColorBrewer')
+
+library(arules)
+library(arulesViz)
+library(RColorBrewer)
+
+# Load the Groceries dataset and explore it
+data("Groceries")
+str(Groceries)
+inspect(head(Groceries, 2))
+Groceries@itemInfo$labels
+
+# Apriori analysis on the Groceries dataset
+grocery_rules <- apriori(Groceries, parameter = list(supp = 0.01, conf = 0.2))
+inspect(rules[1:10])
+inspect(head(sort(grocery_rules, by = 'confidence'), 3))
+inspect(tail(sort(grocery_rules, by = 'confidence'), 3))
+
+# Apriori analysis for "whole milk" rules
+wholemilk_rules <- apriori(data = Groceries, parameters = list(supp = 0.001, conf = 0.08), appearance = list(rhs = 'whole milk'))
+inspect(head(sort(wholemilk_rules, by = 'confidence'), 3))
+
+# Apriori analysis with increased support and confidence
+grocery_rules_increased_support <- apriori(Groceries, parameter = list(support = 0.02, confidence = 0.5))
+inspect(head(sort(grocery_rules_increased_support, by = 'confidence'), 3))
+
+# Item Frequency Plot for Groceries dataset
+itemFrequencyPlot(Groceries, topN = 20, type = "absolute", col = brewer.pal(8, 'Pastel2'), main = "Absolute Item Frequency Plot")
+
+# Import and analyze a transaction dataset (restaurant orders)
+txn <- read.transactions(file = "C:/Users/student/Downloads/restaurant-1-orders.csv", rm.duplicates = TRUE, format = "single", sep = ",", header = TRUE, cols = c("Order Number", "Item Name"))
+str(txn)
+inspect(head(txn, 2))
+txn@itemInfo$labels
+
+# Apriori analysis on the restaurant orders dataset
+rules <- apriori(txn, parameter = list(supp = 0.01, conf = 0.2))
+inspect(rules[1:10])
+inspect(head(sort(rules, by = "confidence"), 3))
+
+# Apriori analysis for "Pilau Rice" rules
+Pilau_Rice_rules <- apriori(data = txn, parameter = list(supp = 0.003, conf = 0.08), appearance = list(rhs = "Pilau Rice"))
+inspect(head(sort(Pilau_Rice_rules, by = "confidence"), 3))
+
+# Apriori analysis with increased support and confidence for restaurant orders
+rules_increased_support <- apriori(txn, parameter = list(support = 0.02, confidence = 0.5))
+inspect(head(sort(rules_increased_support, by = "confidence"), 3))
+
+# Import and analyze a transaction dataset (movies)
+txn <- read.transactions(file = "D:/Chrome Downloads/movies.csv", rm.duplicates = TRUE, format = "basket", sep = ",", header = TRUE, cols = 3)
+str(txn)
+inspect(head(txn, 2))
+
+# Apriori analysis on the movies dataset
+rules <- apriori(txn, parameter = list(supp = 0.01, conf = 0.2))
+inspect(rules[1:10])
+inspect(head(sort(rules, by = "confidence"), 3))
+
+# Apriori analysis for "Children" and "IMAX" rules in the movies dataset
+Children_rules <- apriori(data = txn, parameter = list(supp = 0.001, conf = 0.03), appearance = list(rhs = "Children"))
+IMAX_rules <- apriori(data = txn, parameter = list(supp = 0.001, conf = 0.03), appearance = list(rhs = "IMAX"))
+
+inspect(head(sort(Children_rules, by = "confidence"), 5))
+inspect(head(sort(IMAX_rules, by = "confidence"), 5))
+
+# Apriori analysis with increased support and confidence for movies dataset
+rules_increased_support <- apriori(txn, parameter = list(support = 0.02, confidence = 0.5))
+inspect(head(sort(rules_increased_support, by = "confidence"), 3))
+
+Practical No:- 06
+Aim:- Association rule mining using the Apriori algorithm on supermarket transaction data
+Program:
+library(arules)
+library(arulesViz)
+library(RColorBrewer)
+data<-read.transactions('C:/Users/student/Desktop/supermarket.csv', rm.duplicates= TRUE, format="single",sep=",",header = TRUE,cols=c("City","Product line"))
+str(data)
+inspect(head(data))
+data@itemInfo$labels
+data_rules <- apriori(data, parameter = list(supp = 0.01, conf = 0.2))
+data_rules
+inspect(data_rules[1:20])
+inspect(head(sort(data_rules, by = "confidence"), 10))
+inspect(tail(sort(data_rules, by = "confidence"), 10))
+fashion_rules <- apriori(data=data, parameter=list (supp=0.001,conf =  0.08), appearance = list (rhs="Fashion accessories"))
+inspect(head(sort(fashion_rules, by = "confidence"), 10))
+fashion_rules_increased_support <- apriori(data, parameter = list(support =0.02, confidence = 0.5))
+inspect(head(sort(fashion_rules_increased_support, by = "confidence"), 10))
+itemFrequencyPlot(data,topN=20,type="absolute",col=brewer.pal(8,'Pastel2'), main="Absolute Item Frequency Plot")
+
+Practical No:- 07
+Aim:- PageRank
+Software Used: Google Collab
+Program Code:-
+
+vector_dict={"A":[0,1,1,0],
+"B":[0,0,0,0],
+"C":[0,1,0,1],
+"D":[1,0,0,0]}
+df=0.85
+PageRank={"A":1,"B":1,"C":1,"D":1}
+columns={"A":0,"B":1,"C":2,"D":3}
+def connections(page):
+column=columns[page]
+incomings=[]
+for i in vector_dict.keys():
+for connections in range(len(vector_dict[i])):
+if connections==column and
+vector_dict[i][connections]==1:
+incomings.append(i)
+return incomings
+def outDegree(node):
+count=0
+for i in vector_dict[node]:
+if i==1:
+count+=1
+return count
+for iteration in range(3):
+for i in PageRank.keys():
+factor=0
+incoming_nodes=connections(i)
+for node in incoming_nodes:
+factor+=PageRank[node]/outDegree (node)
+PageRank[i]=(1-df)/4+df*factor
+print("Iteration", iteration, ":", PageRank)
+
+AMT PRACTICAL NO: 8
+AIM: TOPIC MODELLING PROCESS 
+
+CODE:
+install.packages('tm', dependencies = TRUE)
+install.packages("topicmodels")
+library(tm)
+library(topicmodels)
+setwd(C:\Users\student\Desktop\BFC)
+filenames<-list.files(path="C:/Users/student/Desktop/BFC",pattern="*.txt")
+filenames
+
+
+filetext<-lapply(filenames,readLines)
+mycorpus<-Corpus(VectorSource(filetext))
+mycorpus<-tm_map(mycorpus,removeNumbers)
+mycorpus<-tm_map(mycorpus,removePunctuation)
+mycorpus
+
+mystopwords=c("of","a","and","the","in","to","for","that","is","on","are","with","as","by"
+,"be","an","which","it","from","or","can","have","these","has","such","you")
+mycorpus<-tm_map(mycorpus,tolower)
+mycorpus<-tm_map(mycorpus,removeWords,mystopwords)
+dtm<-DocumentTermMatrix(mycorpus)
+k<-3
+lda_output_3<-LDA(dtm,k,method="VEM")
+topics(lda_output_3)
+
+topics(lda_output_3)
+show(dtm)
+
+
+Practical No:- 09
+Aim:- MinHashing
+Software Used: R Studio
+library(textreuse)
+minhash <- minhash_generator(n = 240, seed = 3552)
+head(minhash(c("turn tokens into", "tokens into hashes", "into hashes fast")))
+
+dir <- system.file("extdata/ats", package = "textreuse")
+corpus <- TextReuseCorpus(dir = dir, tokenizer = tokenize_ngrams, n = 5,
+                          minhash_func = minhash, keep_tokens = TRUE,
+                          progress = FALSE)
+head(minhashes(corpus[[1]]))
+length(minhashes(corpus[[1]]))
+lsh_threshold(h = 200, b = 50)
+lsh_threshold(h = 240, b = 80)
+lsh_probability(h = 240, b = 80, s = 0.25)
+lsh_probability(h = 240, b =  80, s = 0.75)
+buckets <- lsh(corpus, bands = 80, progress = FALSE)
+buckets
+baxter_matches <- lsh_query(buckets, "calltounconv00baxt")
+baxter_matches
+candidates <- lsh_candidates(buckets)
+candidates
+lsh_compare(candidates, corpus, jaccard_similarity, progress = FALSE)
+
+Practical No:- 10
+Aim:- K-Shingles
+Program Code:
+eadinteger <- function() {
+n <- as.integer(readline(prompt = "Enter value of k-1: "))
+# Check if the file exists
+file_path <- "C:/Users/student/Desktop/Shingles/shingles.txt"
+if (!file.exists(file_path)) {
+print("Error: File not found.")
+return(NULL)
+}
+# Read the file using a connection
+con <- file(file_path, open = "r")
+lines <- character(0)
+# Read lines and handle incomplete lines
+while (length(line <- readLines(con, n = 1)) > 0) {
+# Check for incomplete lines and skip them
+if (length(line) > 0) {
+lines <- c(lines, line)
+}
+}
+close(con) # Close the file connection
+if (length(lines) == 0) {
+print("Error: The file is empty.")
+return(NULL)
+}
+Shingle <- c()
+for (i in 1:(nchar(lines) - n + 1)) {
+Shingle <- append(Shingle, substr(lines, start = i, stop = i + n - 1))
+}
+print(Shingle)
+}
+# Call the function
+readinteger()
